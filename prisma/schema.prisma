@@ -24,11 +24,11 @@ model Language {
 }
 
 model Movie {
-  id           Int        @id
+  id           Int      @id @default(autoincrement())
   title        String?    @db.VarChar(100)
   release_date DateTime?  @db.Date
-  genre_id     Int?
-  language_id  Int?
+  genre_id     Int  ?     
+  language_id  Int   ?    
   oscar_count  Int?
   language     String?    @db.VarChar(50)
   genres       Genre?    @relation(fields: [genre_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_genre")

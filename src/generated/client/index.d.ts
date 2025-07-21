@@ -4184,7 +4184,7 @@ export namespace Prisma {
     /**
      * The data needed to create a Movie.
      */
-    data: XOR<MovieCreateInput, MovieUncheckedCreateInput>
+    data?: XOR<MovieCreateInput, MovieUncheckedCreateInput>
   }
 
   /**
@@ -4782,7 +4782,6 @@ export namespace Prisma {
   }
 
   export type MovieCreateInput = {
-    id: number
     title?: string | null
     release_date?: Date | string | null
     oscar_count?: number | null
@@ -4792,7 +4791,7 @@ export namespace Prisma {
   }
 
   export type MovieUncheckedCreateInput = {
-    id: number
+    id?: number
     title?: string | null
     release_date?: Date | string | null
     genre_id?: number | null
@@ -4802,7 +4801,6 @@ export namespace Prisma {
   }
 
   export type MovieUpdateInput = {
-    id?: IntFieldUpdateOperationsInput | number
     title?: NullableStringFieldUpdateOperationsInput | string | null
     release_date?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     oscar_count?: NullableIntFieldUpdateOperationsInput | number | null
@@ -4822,7 +4820,7 @@ export namespace Prisma {
   }
 
   export type MovieCreateManyInput = {
-    id: number
+    id?: number
     title?: string | null
     release_date?: Date | string | null
     genre_id?: number | null
@@ -4832,7 +4830,6 @@ export namespace Prisma {
   }
 
   export type MovieUpdateManyMutationInput = {
-    id?: IntFieldUpdateOperationsInput | number
     title?: NullableStringFieldUpdateOperationsInput | string | null
     release_date?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     oscar_count?: NullableIntFieldUpdateOperationsInput | number | null
@@ -5349,7 +5346,6 @@ export namespace Prisma {
   }
 
   export type MovieCreateWithoutGenresInput = {
-    id: number
     title?: string | null
     release_date?: Date | string | null
     oscar_count?: number | null
@@ -5358,7 +5354,7 @@ export namespace Prisma {
   }
 
   export type MovieUncheckedCreateWithoutGenresInput = {
-    id: number
+    id?: number
     title?: string | null
     release_date?: Date | string | null
     language_id?: number | null
@@ -5406,7 +5402,6 @@ export namespace Prisma {
   }
 
   export type MovieCreateWithoutLanguagesInput = {
-    id: number
     title?: string | null
     release_date?: Date | string | null
     oscar_count?: number | null
@@ -5415,7 +5410,7 @@ export namespace Prisma {
   }
 
   export type MovieUncheckedCreateWithoutLanguagesInput = {
-    id: number
+    id?: number
     title?: string | null
     release_date?: Date | string | null
     genre_id?: number | null
@@ -5522,7 +5517,7 @@ export namespace Prisma {
   }
 
   export type MovieCreateManyGenresInput = {
-    id: number
+    id?: number
     title?: string | null
     release_date?: Date | string | null
     language_id?: number | null
@@ -5531,7 +5526,6 @@ export namespace Prisma {
   }
 
   export type MovieUpdateWithoutGenresInput = {
-    id?: IntFieldUpdateOperationsInput | number
     title?: NullableStringFieldUpdateOperationsInput | string | null
     release_date?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     oscar_count?: NullableIntFieldUpdateOperationsInput | number | null
@@ -5558,7 +5552,7 @@ export namespace Prisma {
   }
 
   export type MovieCreateManyLanguagesInput = {
-    id: number
+    id?: number
     title?: string | null
     release_date?: Date | string | null
     genre_id?: number | null
@@ -5567,7 +5561,6 @@ export namespace Prisma {
   }
 
   export type MovieUpdateWithoutLanguagesInput = {
-    id?: IntFieldUpdateOperationsInput | number
     title?: NullableStringFieldUpdateOperationsInput | string | null
     release_date?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     oscar_count?: NullableIntFieldUpdateOperationsInput | number | null
