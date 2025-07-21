@@ -78,10 +78,62 @@ app.put('/movies/:id', async (req, res) => {
          data: data
       });
       res.status(200).send()
-}catch (error) {
-   res.status(500).send({ message: "Falha ao atualizar o filme" });
-   return;
-}
+   } catch (error) {
+      res.status(500).send({ message: "Falha ao atualizar o filme" });
+      return;
+   }
+});
+
+app.delete('/movies/:id', async (req, res) => {
+   try {
+      const id = Number(req.params.id);
+
+      const movie = await prisma.movie.findUnique({
+         where: {
+            id
+         }
+      });
+
+      if (!movie) {
+         res.status(404).send({ message: "Filme não encontrado" });
+         return;
+      }
+
+      await prisma.movie.delete({
+         where: {
+            id
+         }
+      });
+      res.status(204).send();
+   } catch (error) {
+      res.status(500).send({ message: "Falha ao excluir o filme" });
+      return;
+   }
+});
+
+app.get("/movies/:genderName", async (req, res) => {
+   try {
+      const moviesFilteredByGenderName = await prisma.movie.findMany({
+         include: {
+            genres: true,
+            languages: true,
+         },
+         where: {
+            genres: {
+               name: {
+                  equals: req.params.genderName,
+                  mode: "insensitive",
+               },
+            },
+         },
+      });
+
+      res.status(200).send(moviesFilteredByGenderName);
+   } catch (error) {
+      res.status(500).send({ message: "Falha ao atualizar um filme" });
+      return
+   }
+
 });
 
 app.listen(port, () => {
