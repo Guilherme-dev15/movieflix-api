@@ -1,0 +1,15 @@
+{
+  "compilerOptions": {
+    "target": "ES6",               // Versão do JS de saída
+    "module": "commonjs",          // Sistema de módulos (bom para Node.js)
+    "outDir": "./dist",            // Pasta para arquivos compilados
+    "rootDir": "./src",            // Pasta raiz dos arquivos TS
+    "strict": true,                // Ativa verificações rígidas de tipos
+    "esModuleInterop": true,       // Para importar módulos comuns JS facilmente
+    "skipLibCheck": true,          // Pula verificação de tipos em libs (mais rápido)
+    "forceConsistentCasingInFileNames": true,
+    "resolveJsonModule": true
+  },
+  "include": ["src/**/*"],         // Incluir todos os TS dentro de src
+  "exclude": ["node_modules", "**/*.spec.ts"]  // Ignorar node_modules e testes
+}
