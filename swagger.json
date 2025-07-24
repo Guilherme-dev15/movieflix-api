@@ -25,6 +25,157 @@
                         }
                     }
                 }
+            },
+            "post": {
+                "tags": ["Movies"],
+                "summary": "Criar um novo filme",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/MovieInput"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Filme criado com sucesso",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Movie"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Dados inválidos fornecidos",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/movies/{id}": {
+            "get": {
+                "tags": ["Movies"],
+                "summary": "Obter um filme pelo ID",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "description": "ID do filme",
+                        "schema": { "type": "integer", "example": 1 }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Retorna o filme solicitado",
+                        "content": {
+                            "application/json": {
+                                "schema": { "$ref": "#/components/schemas/Movie" }
+                            }
+                        }
+                    },
+                    "404": { "$ref": "#/components/responses/NotFound" }
+                }
+            },
+            "put": {
+                "tags": ["Movies"],
+                "summary": "Substituir um filme (atualização completa)",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "description": "ID do filme a ser substituído",
+                        "schema": { "type": "integer", "example": 1 }
+                    }
+                ],
+                "requestBody": {
+                    "description": "Dados completos do filme para substituição.",
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": { "$ref": "#/components/schemas/MovieInput" }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Filme substituído com sucesso",
+                        "content": {
+                            "application/json": {
+                                "schema": { "$ref": "#/components/schemas/Movie" }
+                            }
+                        }
+                    },
+                    "404": { "$ref": "#/components/responses/NotFound" }
+                }
+            },
+            "patch": {
+                "tags": ["Movies"],
+                "summary": "Atualizar um filme (atualização parcial)",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "description": "ID do filme a ser atualizado",
+                        "schema": { "type": "integer", "example": 1 }
+                    }
+                ],
+                "requestBody": {
+                    "description": "Campos do filme a serem atualizados.",
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": { "$ref": "#/components/schemas/MoviePatchInput" },
+                            "examples": {
+                                "update_genre_language_oscars": {
+                                    "summary": "Exemplo de atualização",
+                                    "value": { "genre_id": 3, "language_id": 2, "oscar_count": 1 }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Filme atualizado com sucesso",
+                        "content": {
+                            "application/json": {
+                                "schema": { "$ref": "#/components/schemas/Movie" }
+                            }
+                        }
+                    },
+                    "404": { "$ref": "#/components/responses/NotFound" }
+                }
+            },
+            "delete": {
+                "tags": ["Movies"],
+                "summary": "Deletar um filme",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "description": "ID do filme a ser deletado",
+                        "schema": { "type": "integer", "example": 1 }
+                    }
+                ],
+                "responses": {
+                    "204": { "description": "Filme deletado com sucesso" },
+                    "404": { "$ref": "#/components/responses/NotFound" }
+                }
             }
         }
     },
@@ -33,30 +184,49 @@
             "Movie": {
                 "type": "object",
                 "properties": {
-                    "id": {
-                        "type": "integer",
-                        "description": "ID do filme"
-                    },
-                    "title": {
-                        "type": "string",
-                        "description": "Título do filme"
-                    },
-                    "genre": {
-                        "type": "string",
-                        "description": "Gênero do filme"
-                    },
-                    "language": {
-                        "type": "string",
-                        "description": "Idioma do filme"
-                    },
-                    "oscar_count": {
-                        "type": "integer",
-                        "description": "Quantidade de Oscars ganhos pelo filme"
-                    },
-                    "release_date": {
-                        "type": "string",
-                        "format": "date",
-                        "description": "Data de lançamento do filme"
+                    "id": { "type": "integer", "example": 10 },
+                    "title": { "type": "string", "example": "Parasita" },
+                    "release_date": { "type": "string", "format": "date", "example": "2019-11-07" },
+                    "genre_id": { "type": "integer", "example": 5 },
+                    "language_id": { "type": "integer", "example": 12 },
+                    "oscar_count": { "type": "integer", "example": 4 }
+                }
+            },
+            "MovieInput": {
+                "type": "object",
+                "required": [ "title", "release_date", "genre_id", "language_id", "oscar_count" ],
+                "properties": {
+                    "title": { "type": "string", "example": "O Poderoso Chefão" },
+                    "release_date": { "type": "string", "format": "date", "example": "1972-03-24" },
+                    "genre_id": { "type": "integer", "example": 1 },
+                    "language_id": { "type": "integer", "example": 2 },
+                    "oscar_count": { "type": "integer", "example": 3 }
+                }
+            },
+            "MoviePatchInput": {
+                "type": "object",
+                "properties": {
+                    "title": { "type": "string", "example": "O Poderoso Chefão: Parte II" },
+                    "release_date": { "type": "string", "format": "date", "example": "1974-12-20" },
+                    "genre_id": { "type": "integer", "example": 1 },
+                    "language_id": { "type": "integer", "example": 2 },
+                    "oscar_count": { "type": "integer", "example": 6 }
+                }
+            },
+            "Error": {
+                "type": "object",
+                "properties": {
+                    "code": { "type": "string", "example": "NOT_FOUND" },
+                    "message": { "type": "string", "example": "O recurso solicitado não foi encontrado." }
+                }
+            }
+        },
+        "responses": {
+            "NotFound": {
+                "description": "Recurso não encontrado",
+                "content": {
+                    "application/json": {
+                        "schema": { "$ref": "#/components/schemas/Error" }
                     }
                 }
             }
