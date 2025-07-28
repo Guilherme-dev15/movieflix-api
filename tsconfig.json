@@ -1,15 +1,112 @@
 {
   "compilerOptions": {
-    "target": "ES6",               // Versão do JS de saída
-    "module": "commonjs",          // Sistema de módulos (bom para Node.js)
-    "outDir": "./dist",            // Pasta para arquivos compilados
-    "rootDir": "./src",            // Pasta raiz dos arquivos TS
-    "strict": true,                // Ativa verificações rígidas de tipos
-    "esModuleInterop": true,       // Para importar módulos comuns JS facilmente
-    "skipLibCheck": true,          // Pula verificação de tipos em libs (mais rápido)
-    "forceConsistentCasingInFileNames": true,
-    "resolveJsonModule": true
+    /* Projetos */
+    // "incremental": true,
+    // "composite": true,
+    // "tsBuildInfoFile": "./.tsbuildinfo",
+    // "disableSourceOfProjectReferenceRedirect": true,
+    // "disableSolutionSearching": true,
+    // "disableReferencedProjectLoad": true,
+
+    /* Linguagem e ambiente */
+    "target": "es2019",                         /* Versão do JS gerada */
+    // "lib": [],
+    // "jsx": "preserve",
+    // "experimentalDecorators": true,
+    // "emitDecoratorMetadata": true,
+    // "jsxFactory": "",
+    // "jsxFragmentFactory": "",
+    // "jsxImportSource": "",
+    // "reactNamespace": "",
+    // "noLib": true,
+    // "useDefineForClassFields": true,
+    // "moduleDetection": "auto",
+
+    /* Módulos */
+    "module": "commonjs",                       /* Sistema de módulos */
+    "rootDir": "./",                         /* Diretório raiz dos fontes */
+    "outDir": "./dist",                         /* Diretório de saída da compilação */
+    "moduleResolution": "node",                 /* Resolução de módulos estilo node */
+    // "baseUrl": "./",
+    // "paths": {},
+    // "rootDirs": [],
+    // "typeRoots": [],
+    // "types": [],
+    // "allowUmdGlobalAccess": true,
+    // "moduleSuffixes": [],
+    // "allowImportingTsExtensions": true,
+    // "rewriteRelativeImportExtensions": true,
+    // "resolvePackageJsonExports": true,
+    // "resolvePackageJsonImports": true,
+    // "customConditions": [],
+    // "noUncheckedSideEffectImports": true,
+    "resolveJsonModule": true,                  /* Importar arquivos .json */
+    // "allowArbitraryExtensions": true,
+    // "noResolve": true,
+
+    /* Suporte a JavaScript */
+    // "allowJs": true,
+    // "checkJs": true,
+    // "maxNodeModuleJsDepth": 1,
+
+    /* Emissão */
+    // "declaration": true,
+    // "declarationMap": true,
+    // "emitDeclarationOnly": true,
+    // "sourceMap": true,
+    // "inlineSourceMap": true,
+    // "noEmit": true,
+    // "outFile": "./",
+    // "removeComments": true,
+    // "importHelpers": true,
+    // "downlevelIteration": true,
+    // "sourceRoot": "",
+    // "mapRoot": "",
+    // "inlineSources": true,
+    // "emitBOM": true,
+    // "newLine": "crlf",
+    // "stripInternal": true,
+    // "noEmitHelpers": true,
+    // "noEmitOnError": true,
+    // "preserveConstEnums": true,
+    // "declarationDir": "./",
+
+    /* Interoperação */
+    // "isolatedModules": true,
+    // "verbatimModuleSyntax": true,
+    // "isolatedDeclarations": true,
+    // "erasableSyntaxOnly": true,
+    // "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,                    /* Facilita importações entre CommonJS e ESModules */
+    // "preserveSymlinks": true,
+    "forceConsistentCasingInFileNames": true,  /* Força consistência de caixa (maiúsc./minúsc.) em imports */
+
+    /* Verificação de tipos */
+    "strict": true,                             /* Ativa todas opções rigorosas de verificação */
+    // "noImplicitAny": true,
+    // "strictNullChecks": true,
+    // "strictFunctionTypes": true,
+    // "strictBindCallApply": true,
+    // "strictPropertyInitialization": true,
+    // "strictBuiltinIteratorReturn": true,
+    // "noImplicitThis": true,
+    // "useUnknownInCatchVariables": true,
+    // "alwaysStrict": true,
+    // "noUnusedLocals": true,
+    // "noUnusedParameters": true,
+    // "exactOptionalPropertyTypes": true,
+    // "noImplicitReturns": true,
+    // "noFallthroughCasesInSwitch": true,
+    // "noUncheckedIndexedAccess": true,
+    // "noImplicitOverride": true,
+    // "noPropertyAccessFromIndexSignature": true,
+    // "allowUnusedLabels": true,
+    // "allowUnreachableCode": true,
+
+    /* Completude */
+    // "skipDefaultLibCheck": true,
+    "skipLibCheck": true                        /* Ignorar checagem de tipos em arquivos *.d.ts */
   },
-  "include": ["src/**/*"],         // Incluir todos os TS dentro de src
-  "exclude": ["node_modules", "**/*.spec.ts"]  // Ignorar node_modules e testes
+  "include": ["src", "swagger.json"],
+  "exclude": ["node_modules"]
 }
