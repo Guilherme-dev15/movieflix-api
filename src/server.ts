@@ -10,17 +10,23 @@ const prisma = new PrismaClient();
 app.use(express.json());
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
-app.get("/movies", async (_, res) => {
-  const movies = await prisma.movie.findMany({
-    orderBy: {
-      title: "asc",
-    },
-    include: {
-      genres: true,
-      languages: true,
-    },
-  });
-  res.json(movies);
+app.get("/movies", async (req, res) => {
+  try {
+    const limit = parseInt(req.query.limit as string) || 15;
+    const offset = parseInt(req.query.offset as string) || 0;
+
+    const movies = await prisma.movie.findMany({
+      skip: offset,
+      take: limit,
+      orderBy: { title: "asc" },
+      include: { genres: true, languages: true },
+    });
+
+    res.json(movies);
+  } catch (error) {
+    console.error("Erro ao buscar filmes:", error);
+    res.status(500).send("Erro no servidor");
+  }
 });
 
 app.post("/movies", async (req, res) => {
