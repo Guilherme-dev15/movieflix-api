@@ -12,17 +12,22 @@ const app = (0, express_1.default)();
 const prisma = new client_1.PrismaClient();
 app.use(express_1.default.json());
 app.use("/api-docs", swagger_ui_express_1.default.serve, swagger_ui_express_1.default.setup(swagger_json_1.default));
-app.get("/movies", async (_, res) => {
-    const movies = await prisma.movie.findMany({
-        orderBy: {
-            title: "asc",
-        },
-        include: {
-            genres: true,
-            languages: true,
-        },
-    });
-    res.json(movies);
+app.get("/movies", async (req, res) => {
+    try {
+        const limit = parseInt(req.query.limit) || 10;
+        const offset = parseInt(req.query.offset) || 0;
+        const movies = await prisma.movie.findMany({
+            skip: offset,
+            take: limit,
+            orderBy: { title: "asc" },
+            include: { genres: true, languages: true },
+        });
+        res.json(movies);
+    }
+    catch (error) {
+        console.error("Erro ao buscar filmes:", error);
+        res.status(500).send("Erro no servidor");
+    }
 });
 app.post("/movies", async (req, res) => {
     const { title, genre_id, language_id, oscar_count, release_date } = req.body;
@@ -114,6 +119,29 @@ app.get("/movies/genre/:genrerName", async (req, res) => {
         return res
             .status(500)
             .send({ message: "Falha ao atualizar um filme", error });
+    }
+});
+//filtragem por idioma
+app.get("/movies/language/:languageName", async (req, res) => {
+    try {
+        const moviesFilteredByLanguageName = await prisma.movie.findMany({
+            include: {
+                genres: true,
+                languages: true,
+            },
+            where: {
+                languages: {
+                    name: {
+                        equals: req.params.languageName,
+                        mode: "insensitive",
+                    },
+                },
+            }
+        });
+        res.status(200).send(moviesFilteredByLanguageName);
+    }
+    catch (error) {
+        return res.status(500).send({ message: "Falha ao atualizar um filme", error });
     }
 });
 app.listen(port, () => {

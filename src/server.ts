@@ -12,7 +12,7 @@ app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
 app.get("/movies", async (req, res) => {
   try {
-    const limit = parseInt(req.query.limit as string) || 15;
+    const limit = parseInt(req.query.limit as string) || 10;
     const offset = parseInt(req.query.offset as string) || 0;
 
     const movies = await prisma.movie.findMany({
@@ -133,6 +133,31 @@ app.get("/movies/genre/:genrerName", async (req, res) => {
       .send({ message: "Falha ao atualizar um filme", error });
   }
 });
+
+//filtragem por idioma
+app.get("/movies/language/:languageName", async (req, res) => {
+  try {
+    const moviesFilteredByLanguageName = await prisma.movie.findMany({
+      include:{
+        genres: true,
+        languages: true,
+      },
+      where: {
+        languages: {
+          name: {
+            equals: req.params.languageName,
+            mode: "insensitive",
+          },
+        },
+      }
+    })
+    res.status(200).send(moviesFilteredByLanguageName);
+  } catch (error) {
+    return res.status(500).send({ message: "Falha ao atualizar um filme", error });
+
+  }
+})
+
 
 app.listen(port, () => {
   console.log(`Servidor em execução em http://localhost:${port}`);

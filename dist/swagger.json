@@ -157,6 +157,45 @@
                     }
                 }
             }
+        },
+        "/movies/language/{languageName}": {
+            "get": {
+                "tags": ["Filmes"],
+                "summary": "Obter filmes por idioma",
+                "description": "Retorna uma lista de filmes filtrados pelo idioma especificado.",
+                "parameters": [
+                    {
+                        "name": "languageName",
+                        "in": "path",
+                        "required": true,
+                        "description": "Nome do idioma do filme.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Lista de filmes do idioma especificado retornada com sucesso.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/Movie"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Idioma não encontrado."
+                    },
+                    "500": {
+                        "description": "Erro interno do servidor."
+                    }
+                }
+            }
         }
     },
     "components": {
