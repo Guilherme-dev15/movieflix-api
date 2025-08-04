@@ -97,51 +97,75 @@ app.delete("/movies/:id", async (req, res) => {
     }
     res.status(200).send();
 });
+//filtragem por gênero e idioma
 app.get("/movies/genre/:genrerName", async (req, res) => {
+    const genrerName = req.params.genrerName;
+    const languageName = req.query.languageName;
+    const whereClause = {};
+    if (genrerName) {
+        whereClause.genres = {
+            name: {
+                equals: genrerName,
+                mode: "insensitive",
+            },
+        };
+    }
+    if (languageName) {
+        whereClause.languages = {
+            name: {
+                equals: languageName,
+                mode: "insensitive",
+            },
+        };
+    }
     try {
-        const moviesFilteredByGenrerName = await prisma.movie.findMany({
+        const moviesFiltered = await prisma.movie.findMany({
             include: {
                 genres: true,
                 languages: true,
             },
-            where: {
-                genres: {
-                    name: {
-                        equals: req.params.genrerName,
-                        mode: "insensitive",
-                    },
-                },
-            },
+            where: whereClause,
         });
-        res.status(200).send(moviesFilteredByGenrerName);
+        res.status(200).send(moviesFiltered);
     }
     catch (error) {
         return res
             .status(500)
-            .send({ message: "Falha ao atualizar um filme", error });
+            .send({ message: "Falha ao filtrar filmes", error });
     }
 });
 //filtragem por idioma
 app.get("/movies/language/:languageName", async (req, res) => {
     try {
+        const languageName = req.params.languageName;
+        console.log(`Buscando filmes com o idioma: ${languageName}`); // Ótimo para depuração
         const moviesFilteredByLanguageName = await prisma.movie.findMany({
             include: {
-                genres: true,
+                // Você pode incluir 'languages' para ver os dados do idioma no resultado
                 languages: true,
             },
             where: {
+                // Acessando a relação 'languages' (que é um único objeto)
                 languages: {
+                    // E filtrando pelo campo 'name' desse objeto relacionado
                     name: {
                         equals: req.params.languageName,
                         mode: "insensitive",
                     },
                 },
-            }
+            },
         });
+        if (moviesFilteredByLanguageName.length === 0) {
+            // É uma boa prática informar ao cliente que a busca não retornou resultados.
+            return res.status(404).send({ message: "Nenhum filme encontrado para este idioma." });
+        }
         res.status(200).send(moviesFilteredByLanguageName);
     }
     catch (error) {
-        return res.status(500).send({ message: "Falha ao atualizar um filme", error });
+        // É uma boa prática logar o erro no servidor para depuração
+        console.error("Falha ao buscar filmes por idioma:", error);
+        // E enviar uma mensagem mais genérica e segura para o cliente
+        return res.status(500).send({ message: "Ocorreu um erro interno no servidor." });
     }
 });
 app.listen(port, () => {

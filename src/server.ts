@@ -1,5 +1,5 @@
 import express from "express";
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient, Prisma } from "@prisma/client";
 import swaggerUi from "swagger-ui-express";
 import swaggerDocument from "../swagger.json";
 
@@ -10,6 +10,7 @@ const prisma = new PrismaClient();
 app.use(express.json());
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
+// Rota para buscar todos os filmes com paginação
 app.get("/movies", async (req, res) => {
   try {
     const limit = parseInt(req.query.limit as string) || 10;
@@ -28,7 +29,7 @@ app.get("/movies", async (req, res) => {
     res.status(500).send("Erro no servidor");
   }
 });
-
+// Rota para buscar um filme específico
 app.post("/movies", async (req, res) => {
   const { title, genre_id, language_id, oscar_count, release_date } = req.body;
 
@@ -62,7 +63,7 @@ app.post("/movies", async (req, res) => {
 
   res.status(201).send();
 });
-
+// Atualização de filme
 app.put("/movies/:id", async (req, res) => {
   const id = Number(req.params.id);
 
@@ -88,7 +89,7 @@ app.put("/movies/:id", async (req, res) => {
   }
   res.status(200).send();
 });
-
+// Rota para remover um filme
 app.delete("/movies/:id", async (req, res) => {
   const id = Number(req.params.id);
 
@@ -109,37 +110,55 @@ app.delete("/movies/:id", async (req, res) => {
   res.status(200).send();
 });
 
+// Filtragem por gênero e idioma
 app.get("/movies/genre/:genrerName", async (req, res) => {
+  const genrerName = req.params.genrerName as string;
+  const languageName = req.query.languageName as string;
+
+  const whereClause: Prisma.MovieWhereInput = {};
+
+  if (genrerName) {
+    whereClause.genres = {
+      name: {
+        equals: genrerName,
+        mode: "insensitive",
+      },
+    };
+  }
+  if (languageName) {
+    whereClause.languages = {
+      name: {
+        equals: languageName,
+        mode: "insensitive",
+      },
+    };
+  }
+
   try {
-    const moviesFilteredByGenrerName = await prisma.movie.findMany({
+    const moviesFiltered = await prisma.movie.findMany({
       include: {
         genres: true,
         languages: true,
       },
-      where: {
-        genres: {
-          name: {
-            equals: req.params.genrerName,
-            mode: "insensitive",
-          },
-        },
-      },
+      where: whereClause,
     });
 
-    res.status(200).send(moviesFilteredByGenrerName);
+    res.status(200).send(moviesFiltered);
   } catch (error) {
     return res
       .status(500)
-      .send({ message: "Falha ao atualizar um filme", error });
+      .send({ message: "Falha ao filtrar filmes", error });
   }
 });
 
-//filtragem por idioma
+// Rota para buscar filmes por idioma
 app.get("/movies/language/:languageName", async (req, res) => {
   try {
+    const languageName = req.params.languageName;
+    console.log(`Buscando filmes com o idioma: ${languageName}`);
+
     const moviesFilteredByLanguageName = await prisma.movie.findMany({
-      include:{
-        genres: true,
+      include: {
         languages: true,
       },
       where: {
@@ -149,14 +168,56 @@ app.get("/movies/language/:languageName", async (req, res) => {
             mode: "insensitive",
           },
         },
-      }
-    })
-    res.status(200).send(moviesFilteredByLanguageName);
-  } catch (error) {
-    return res.status(500).send({ message: "Falha ao atualizar um filme", error });
+      },
+    });
 
+    if (moviesFilteredByLanguageName.length === 0) {
+      // Se não houver filmes com o idioma especificado, retornar 404
+      return res.status(404).send({ message: "Nenhum filme encontrado para este idioma." });
+    }
+
+    res.status(200).send(moviesFilteredByLanguageName);
+
+  } catch (error) {
+    // Logar o erro para depuração
+    console.error("Falha ao buscar filmes por idioma:", error);
+    // Retornar uma resposta de erro genérica
+    return res.status(500).send({ message: "Ocorreu um erro interno no servidor." });
   }
-})
+});
+
+
+// Rota para buscar filme pelo id do genero
+app.get("/movies/genre/:genreId", async (req, res) => {
+  const genreId = Number(req.params.genreId);
+  // debugando o valor de genreId
+  console.log(`Buscando filmes com o gênero ID: ${genreId}`);
+
+  try {
+    const moviesFilteredByGenreId = await prisma.movie.findMany({
+      where: {
+        genre_id: genreId,
+      },
+      include: {
+        genres: true,
+        languages: true,
+      },
+    })
+    return res.status(200).send({ message: "Filmes encontrados com sucesso.", movies: moviesFilteredByGenreId });
+  }
+  catch (error) {
+    return res.status(404).send({ message: "Nenhum filme encontrado para este gênero.", error });
+  }
+}
+);
+
+
+// Rota para buscar filme pelo id do filme
+
+
+
+
+
 
 
 app.listen(port, () => {

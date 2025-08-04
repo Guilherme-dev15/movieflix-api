@@ -8,7 +8,9 @@
     "paths": {
         "/movies": {
             "get": {
-                "tags": ["Filmes"],
+                "tags": [
+                    "Filmes"
+                ],
                 "summary": "Obter todos os filmes",
                 "description": "Retorna uma lista de todos os filmes disponíveis na base de dados.",
                 "responses": {
@@ -44,7 +46,9 @@
         },
         "/movies/{id}": {
             "put": {
-                "tags": ["Filmes"],
+                "tags": [
+                    "Filmes"
+                ],
                 "summary": "Atualizar um filme existente",
                 "description": "Atualiza as informações de um filme com base no ID fornecido.",
                 "parameters": [
@@ -92,7 +96,9 @@
                 }
             },
             "delete": {
-                "tags": ["Filmes"],
+                "tags": [
+                    "Filmes"
+                ],
                 "summary": "Remover um filme",
                 "description": "Remove um filme da base de dados com base no ID fornecido.",
                 "parameters": [
@@ -121,9 +127,11 @@
         },
         "/movies/genre/{genreName}": {
             "get": {
-                "tags": ["Filmes"],
-                "summary": "Obter filmes por gênero",
-                "description": "Retorna uma lista de filmes filtrados pelo gênero especificado.",
+                "tags": [
+                    "Filmes"
+                ],
+                "summary": " Filtrar filmes por gênero e idioma",
+                "description": "Retorna uma lista de filmes filtrados pelo gênero e/ou idioma especificado.",
                 "parameters": [
                     {
                         "name": "genreName",
@@ -133,35 +141,102 @@
                         "schema": {
                             "type": "string"
                         }
+                    },
+                    {
+                        "name": "languageName",
+                        "in": "query",
+                        "required": false,
+                        "description": "Nome do idioma para filtrar (opcional)",
+                        "schema": {
+                            "type": "string"
+                        }
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "Lista de filmes do gênero especificado retornada com sucesso.",
+                        "description": "Lista de filmes filtrados",
                         "content": {
                             "application/json": {
                                 "schema": {
                                     "type": "array",
                                     "items": {
-                                        "$ref": "#/components/schemas/Movie"
+                                        "type": "object",
+                                        "properties": {
+                                            "id": {
+                                                "type": "integer",
+                                                "example": 123
+                                            },
+                                            "title": {
+                                                "type": "string",
+                                                "example": "Filme Exemplo"
+                                            },
+                                            "genres": {
+                                                "type": "array",
+                                                "items": {
+                                                    "type": "object",
+                                                    "properties": {
+                                                        "id": {
+                                                            "type": "integer",
+                                                            "example": 1
+                                                        },
+                                                        "name": {
+                                                            "type": "string",
+                                                            "example": "Ação"
+                                                        }
+                                                    }
+                                                }
+                                            },
+                                            "languages": {
+                                                "type": "array",
+                                                "items": {
+                                                    "type": "object",
+                                                    "properties": {
+                                                        "id": {
+                                                            "type": "integer",
+                                                            "example": 1
+                                                        },
+                                                        "name": {
+                                                            "type": "string",
+                                                            "example": "Português"
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
                                     }
                                 }
                             }
                         }
                     },
-                    "404": {
-                        "description": "Gênero não encontrado."
-                    },
                     "500": {
-                        "description": "Erro interno do servidor."
+                        "description": "Erro interno ao filtrar filmes",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Falha ao filtrar filmes"
+                                        },
+                                        "error": {
+                                            "type": "string",
+                                            "example": "Detalhes do erro aqui"
+                                        }
+                                    }
+                                }
+                            }
+                        }
                     }
                 }
             }
         },
         "/movies/language/{languageName}": {
             "get": {
-                "tags": ["Filmes"],
-                "summary": "Obter filmes por idioma",
+                "tags": [
+                    "Filmes"
+                ],
+                "summary": "Filtrar filmes por idioma",
                 "description": "Retorna uma lista de filmes filtrados pelo idioma especificado.",
                 "parameters": [
                     {
@@ -176,23 +251,17 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "Lista de filmes do idioma especificado retornada com sucesso.",
+                        "description": "Lista de filmes filtrados por idioma retornada com sucesso.",
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "type": "array",
-                                    "items": {
-                                        "$ref": "#/components/schemas/Movie"
-                                    }
+                                    "$ref": "#/components/schemas/Movie"
                                 }
                             }
                         }
                     },
-                    "404": {
-                        "description": "Idioma não encontrado."
-                    },
                     "500": {
-                        "description": "Erro interno do servidor."
+                        "description": "Erro interno ao filtrar filmes por idioma."
                     }
                 }
             }
