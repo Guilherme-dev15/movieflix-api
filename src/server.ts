@@ -2,6 +2,8 @@ import express from "express";
 import { PrismaClient, Prisma } from "@prisma/client";
 import swaggerUi from "swagger-ui-express";
 import swaggerDocument from "../swagger.json";
+import bcrypt from "bcrypt";
+import jwt from "jsonwebtoken";
 
 const port = 3000;
 const app = express();
@@ -29,6 +31,7 @@ app.get("/movies", async (req, res) => {
     res.status(500).send("Erro no servidor");
   }
 });
+
 // Rota para buscar um filme específico
 app.post("/movies", async (req, res) => {
   const { title, genre_id, language_id, oscar_count, release_date } = req.body;
@@ -63,6 +66,7 @@ app.post("/movies", async (req, res) => {
 
   res.status(201).send();
 });
+
 // Atualização de filme
 app.put("/movies/:id", async (req, res) => {
   const id = Number(req.params.id);
@@ -89,6 +93,7 @@ app.put("/movies/:id", async (req, res) => {
   }
   res.status(200).send();
 });
+
 // Rota para remover um filme
 app.delete("/movies/:id", async (req, res) => {
   const id = Number(req.params.id);
@@ -186,38 +191,159 @@ app.get("/movies/language/:languageName", async (req, res) => {
   }
 });
 
-
-// Rota para buscar filme pelo id do genero
-app.get("/movies/genre/:genreId", async (req, res) => {
-  const genreId = Number(req.params.genreId);
-  // debugando o valor de genreId
-  console.log(`Buscando filmes com o gênero ID: ${genreId}`);
+// Rota para buscar genero pelo id
+app.get("/genre/:id", async (req, res) => {
+  const id = Number(req.params.id);
+  console.log(`Buscando gênero com o ID: ${id}`);
 
   try {
-    const moviesFilteredByGenreId = await prisma.movie.findMany({
-      where: {
-        genre_id: genreId,
-      },
-      include: {
-        genres: true,
-        languages: true,
-      },
-    })
-    return res.status(200).send({ message: "Filmes encontrados com sucesso.", movies: moviesFilteredByGenreId });
-  }
-  catch (error) {
-    return res.status(404).send({ message: "Nenhum filme encontrado para este gênero.", error });
-  }
-}
-);
+    const genre = await prisma.genre.findUnique({
+      where: { id },
+    });
 
+    if (!genre) {
+      return res.status(404).json({ message: "Gênero não encontrado" });
+    }
+
+    res.json(genre);
+  } catch (error) {
+    console.error("Erro ao buscar gênero:", error);
+    res.status(500).send("Erro no servidor");
+  }
+});
+
+// Rota para buscar idioma pelo id
+app.get("/language/:id", async (req, res) => {
+  const id = Number(req.params.id);
+  console.log(`Buscando idioma com o ID: ${id}`);
+
+  try {
+    const language = await prisma.language.findUnique({
+      where: { id },
+    });
+
+    if (!language) {
+      return res.status(404).json({ message: "Idioma não encontrado" });
+    }
+
+    res.json(language);
+  } catch (error) {
+    console.error("Erro ao buscar idioma:", error);
+    res.status(500).send("Erro no servidor");
+  }
+});
 
 // Rota para buscar filme pelo id do filme
+app.get("/movies/:id", async (req, res) => {
+  const id = Number(req.params.id);
 
+  try {
+    const movie = await prisma.movie.findUnique({
+      where: { id },
+      include: { genres: true, languages: true },
+    });
 
+    if (!movie) {
+      return res.status(404).send({ message: "Filme não encontrado" });
+    }
 
+    res.json(movie);
+  } catch (error) {
+    console.error("Erro ao buscar filme:", error);
+    res.status(500).send("Erro no servidor");
+  }
+});
 
+// Cadastro de usuario
+app.post("/register/users", async (req, res) => {
+  const { username, email, password } = req.body;
 
+  try {
+    // Verifica se usuário já existe
+    const userExists = await prisma.user.findFirst({
+      where: {
+        OR: [
+          { username: { equals: username, mode: "insensitive" } },
+          { email: { equals: email, mode: "insensitive" } },
+        ],
+      },
+    });
+
+    if (userExists) {
+      return res.status(409).send({ message: "Usuário já cadastrado" });
+    }
+
+    // criptografia da senha
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    await prisma.user.create({
+      data: {
+        username,
+        email,
+        password_hash: hashedPassword, 
+      },
+    });
+
+    res.status(201).send();
+  } catch (error) {
+    console.error("Erro ao cadastrar usuário:", error);
+    
+    // Tratamento específico para erro de tamanho
+    interface PrismaError {
+      code?: string;
+      [key: string]: unknown;
+    }
+    const prismaError = error as PrismaError;
+    if (typeof error === "object" && error !== null && "code" in prismaError && prismaError.code === 'P2000') {
+      return res.status(400).send({ 
+        message: "Dados excedem o tamanho máximo permitido" 
+      });
+    }
+    
+    res.status(500).send("Erro no servidor");
+  }
+});
+
+// Rota de login
+app.post("/login", async (req, res) => {
+  const { email, password } = req.body;
+
+  try {
+    const user = await prisma.user.findUnique({ where: { email } });
+
+    if (!user) return res.status(404).send({ message: "Usuário não encontrado" });
+    
+    const validPassword = await bcrypt.compare(password, user.password_hash);
+    if (!validPassword) return res.status(401).send({ message: "Senha incorreta" });
+
+    // --- VALIDAÇÃO DO JWT SECRET ---
+    const jwtSecret = process.env.JWT_SECRET;
+    if (!jwtSecret) return res.status(500).send({ message: "Configuração de segurança inválida" });
+
+    // --- GERAÇÃO DO TOKEN ---
+    const token = jwt.sign(
+      { userId: user.id },
+      jwtSecret,
+      {
+        expiresIn: "1h",
+        algorithm: "HS256",
+        // issuer: "sua-api"
+      }
+    );
+
+    return res.json({ token });
+    
+  } catch (error) {
+    console.error("Erro no login:", error);
+    
+    // Tratamento específico para erros de JWT
+    if (error instanceof jwt.JsonWebTokenError) {
+      return res.status(500).send("Falha na autenticação");
+    }
+    
+    return res.status(500).send("Erro no servidor");
+  }
+});
 
 
 app.listen(port, () => {
