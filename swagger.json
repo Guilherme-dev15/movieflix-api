@@ -6,13 +6,33 @@
     "version": "1.0.0"
   },
   "paths": {
-    "/movies": {
+    "/api/movies": {
       "get": {
         "tags": [
           "Filmes"
         ],
         "summary": "Obter todos os filmes",
-        "description": "Retorna uma lista de todos os filmes disponíveis na base de dados.",
+        "description": "Retorna uma lista de todos os filmes disponíveis na base de dados, com suporte a paginação.",
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "Número de filmes a serem retornados (padrão: 10).",
+            "schema": {
+              "type": "integer",
+              "default": 10
+            }
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "description": "Número de filmes a serem pulados (padrão: 0).",
+            "schema": {
+              "type": "integer",
+              "default": 0
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": "Lista de filmes retornada com sucesso.",
@@ -42,15 +62,103 @@
             }
           }
         }
+      },
+      "post": {
+        "tags": [
+          "Filmes"
+        ],
+        "summary": "Cadastrar um novo filme",
+        "description": "Adiciona um novo filme ao banco de dados. Requer autenticação.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MovieInput"
+              },
+              "examples": {
+                "example1": {
+                  "value": {
+                    "title": "A Chegada",
+                    "genre_id": 3,
+                    "language_id": 1,
+                    "oscar_count": 1,
+                    "release_date": "2016-11-10"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Filme cadastrado com sucesso."
+          },
+          "401": {
+            "description": "Não autorizado."
+          },
+          "409": {
+            "description": "Já existe um filme cadastrado com este título."
+          },
+          "500": {
+            "description": "Falha ao cadastrar um filme."
+          }
+        }
       }
     },
-    "/movies/{id}": {
+    "/api/movies/{id}": {
+      "get": {
+        "tags": [
+          "Filmes"
+        ],
+        "summary": "Buscar filme por ID",
+        "description": "Retorna um filme específico com base no ID fornecido.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "ID do filme a ser buscado.",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Filme encontrado com sucesso.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Movie"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Filme não encontrado."
+          },
+          "500": {
+            "description": "Erro interno do servidor."
+          }
+        }
+      },
       "put": {
         "tags": [
           "Filmes"
         ],
         "summary": "Atualizar um filme existente",
-        "description": "Atualiza as informações de um filme com base no ID fornecido.",
+        "description": "Atualiza as informações de um filme com base no ID fornecido. Requer autenticação.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
         "parameters": [
           {
             "name": "id",
@@ -87,6 +195,9 @@
           "200": {
             "description": "Filme atualizado com sucesso."
           },
+          "401": {
+            "description": "Não autorizado."
+          },
           "404": {
             "description": "Filme não encontrado."
           },
@@ -100,7 +211,12 @@
           "Filmes"
         ],
         "summary": "Remover um filme",
-        "description": "Remove um filme da base de dados com base no ID fornecido.",
+        "description": "Remove um filme da base de dados com base no ID fornecido. Requer autenticação.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
         "parameters": [
           {
             "name": "id",
@@ -116,6 +232,9 @@
           "200": {
             "description": "Filme removido com sucesso."
           },
+          "401": {
+            "description": "Não autorizado."
+          },
           "404": {
             "description": "Filme não encontrado."
           },
@@ -125,12 +244,12 @@
         }
       }
     },
-    "/movies/genre/{genreName}": {
+    "/api/movies/genre/{genreName}": {
       "get": {
         "tags": [
           "Filmes"
         ],
-        "summary": " Filtrar filmes por gênero e idioma",
+        "summary": "Filtrar filmes por gênero e idioma",
         "description": "Retorna uma lista de filmes filtrados pelo gênero e/ou idioma especificado.",
         "parameters": [
           {
@@ -171,34 +290,28 @@
                         "example": "Filme Exemplo"
                       },
                       "genres": {
-                        "type": "array",
-                        "items": {
-                          "type": "object",
-                          "properties": {
-                            "id": {
-                              "type": "integer",
-                              "example": 1
-                            },
-                            "name": {
-                              "type": "string",
-                              "example": "Ação"
-                            }
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "integer",
+                            "example": 1
+                          },
+                          "name": {
+                            "type": "string",
+                            "example": "Ação"
                           }
                         }
                       },
                       "languages": {
-                        "type": "array",
-                        "items": {
-                          "type": "object",
-                          "properties": {
-                            "id": {
-                              "type": "integer",
-                              "example": 1
-                            },
-                            "name": {
-                              "type": "string",
-                              "example": "Português"
-                            }
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "integer",
+                            "example": 1
+                          },
+                          "name": {
+                            "type": "string",
+                            "example": "Português"
                           }
                         }
                       }
@@ -213,17 +326,10 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "properties": {
-                    "message": {
-                      "type": "string",
-                      "example": "Falha ao filtrar filmes"
-                    },
-                    "error": {
-                      "type": "string",
-                      "example": "Detalhes do erro aqui"
-                    }
-                  }
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "message": "Falha ao filtrar filmes"
                 }
               }
             }
@@ -231,7 +337,7 @@
         }
       }
     },
-    "/movies/language/{languageName}": {
+    "/api/movies/language/{languageName}": {
       "get": {
         "tags": [
           "Filmes"
@@ -255,10 +361,16 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Movie"
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Movie"
+                  }
                 }
               }
             }
+          },
+          "404": {
+            "description": "Nenhum filme encontrado para este idioma."
           },
           "500": {
             "description": "Erro interno ao filtrar filmes por idioma."
@@ -266,13 +378,13 @@
         }
       }
     },
-    "/register/users": {
+    "/api/users/register": {
       "post": {
         "tags": [
           "Users"
         ],
-        "summary": "Create a new user",
-        "description": "Register a new user with username, email and password.\n**Security Note:** Passwords are hashed before storage.",
+        "summary": "Criar um novo usuário",
+        "description": "Cadastra um novo usuário com nome de usuário, email e senha.\n**Nota de Segurança:** As senhas são criptografadas antes do armazenamento.",
         "requestBody": {
           "required": true,
           "content": {
@@ -290,10 +402,10 @@
         },
         "responses": {
           "201": {
-            "description": "User created successfully"
+            "description": "Usuário criado com sucesso."
           },
           "400": {
-            "description": "Invalid input data",
+            "description": "Dados de entrada inválidos.",
             "content": {
               "application/json": {
                 "schema": {
@@ -306,7 +418,7 @@
             }
           },
           "409": {
-            "description": "Conflict - User already exists",
+            "description": "Conflito - Usuário já existe.",
             "content": {
               "application/json": {
                 "schema": {
@@ -319,7 +431,7 @@
             }
           },
           "500": {
-            "description": "Internal Server Error",
+            "description": "Erro interno do servidor.",
             "content": {
               "application/json": {
                 "schema": {
@@ -334,7 +446,7 @@
         }
       }
     },
-    "/login": {
+    "/api/users/login": {
       "post": {
         "tags": [
           "Users"
@@ -409,6 +521,9 @@
               }
             }
           },
+          "404": {
+            "description": "Usuário não encontrado"
+          },
           "500": {
             "description": "Internal Server Error",
             "content": {
@@ -421,6 +536,82 @@
                 }
               }
             }
+          }
+        }
+      }
+    },
+    "/api/users/genre/{id}": {
+      "get": {
+        "tags": [
+          "Users"
+        ],
+        "summary": "Buscar gênero por ID",
+        "description": "Retorna um gênero de filme específico com base no ID fornecido.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "ID do gênero a ser buscado.",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Gênero encontrado com sucesso.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Genre"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Gênero não encontrado."
+          },
+          "500": {
+            "description": "Erro interno do servidor."
+          }
+        }
+      }
+    },
+    "/api/users/language/{id}": {
+      "get": {
+        "tags": [
+          "Users"
+        ],
+        "summary": "Buscar idioma por ID",
+        "description": "Retorna um idioma de filme específico com base no ID fornecido.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "ID do idioma a ser buscado.",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Idioma encontrado com sucesso.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Language"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Idioma não encontrado."
+          },
+          "500": {
+            "description": "Erro interno do servidor."
           }
         }
       }
@@ -527,6 +718,35 @@
             "description": "Data de lançamento do filme."
           }
         }
+      },
+      "Genre": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer"
+          },
+          "name": {
+            "type": "string"
+          }
+        }
+      },
+      "Language": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer"
+          },
+          "name": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
       }
     }
   }
